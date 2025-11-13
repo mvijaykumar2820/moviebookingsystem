@@ -1,0 +1,18 @@
+# API Keys and Configuration
+config.js
+
+# Firebase configuration
+firebase-config.js
+
+# Node modules (if you add any)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
