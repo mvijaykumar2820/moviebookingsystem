@@ -3,14 +3,23 @@ import { getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, collection, quer
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
 // Import configuration from separate file (not committed to GitHub)
-import { firebaseConfig, OMDB_API_KEY } from './config.js';
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+// Fetch Firebase config from Vercel serverless function
+async function loadFirebaseConfig() {
+    const res = await fetch('/api/firebaseConfig');
+    return res.json();
+}
+
+let app, db, auth;
+
+// Initialize Firebase dynamically
+loadFirebaseConfig().then(cfg => {
+    app = initializeApp(cfg);
+    db = getFirestore(app);
+    auth = getAuth(app);
+});
 
 // OMDb API Configuration
-const OMDB_BASE_URL = "https://www.omdbapi.com/";
 
 // Global State
 let currentUser = null;
@@ -69,16 +78,14 @@ window.showPage = function(pageId) {
 
 // Movie API Functions
 async function fetchMovieById(imdbId) {
-    const url = `${OMDB_BASE_URL}?i=${imdbId}&apikey=${OMDB_API_KEY}`;
-    const res = await fetch(url);
+    const res = await fetch(`/api/omdb?i=${imdbId}`);
     const data = await res.json();
     if (data.Response === "True") return data;
     throw new Error(data.Error || "Movie not found");
 }
 
 async function searchMovies(title) {
-    const url = `${OMDB_BASE_URL}?s=${encodeURIComponent(title)}&apikey=${OMDB_API_KEY}`;
-    const res = await fetch(url);
+    const res = await fetch(`/api/omdb?s=${encodeURIComponent(title)}`);
     const data = await res.json();
     if (data.Response === "True") return data.Search;
     return [];
